@@ -420,7 +420,7 @@ export class Exchange {
         recipient: AccountId,
         signature_id: string
     }): NearPromise {
-        const sender_id = near.predecessorAccountId();
+        const sender_id = near.signerAccountId();
         assert(!this.restrict_to_oracle || this.oracles.get(sender_id), "Sender is not a oracle");
         assert(this.restrict_to_oracle || sender_id === recipient, "Sender and recipient are not the same");
 

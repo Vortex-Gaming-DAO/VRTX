@@ -4,14 +4,15 @@
   "license": "(MIT AND Apache-2.0)",
   "type": "module",
   "scripts": {
-    "build": "./build.sh",
+    "buildV1": "./buildV1.sh",
+    "buildV2": "./buildV2.sh",
     "deploy": "./deploy.sh",
     "test": "echo use integration-tests"
   },
   "dependencies": {
     "near-cli": "^3.4.2",
     "near-contract-standards": "^1.0.0",
-    "near-sdk-js": "1.0.0"
+    "near-sdk-js": "^2.0.0"
   },
   "devDependencies": {
     "ts-morph": "^16.0.0",

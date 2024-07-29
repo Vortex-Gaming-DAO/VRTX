@@ -15,7 +15,7 @@ package-lock.json
 /coverage
 
 # production
-/build
+/build*
 
 # misc
 .DS_Store
@@ -32,3 +32,6 @@ yarn-error.log*
 **/target
 
 README.md
+
+res
+scripts

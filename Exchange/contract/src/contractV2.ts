@@ -450,11 +450,6 @@ export class Exchange {
         // 수수료 VRTX양
         const exchange_fee = exchange_amount * this._get_exchange_fee_ratio(ft_contract_id) / BigInt(1000);
 
-        // 교환 가능한 양 재설정
-        this.distribute_amounts.set(ft_contract_id, exchangeable_amount - BigInt(exchange_amount));
-        // 타이머 재설정
-        this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
-
         const promise = NearPromise.new(ft_contract_id)
                             .functionCall(
                                 "ft_transfer", 
@@ -474,6 +469,11 @@ export class Exchange {
                                 NO_DEPOSIT, 
                                 FIVE_TGAS
                             ));
+
+        // 교환 가능한 양 재설정
+        this.distribute_amounts.set(ft_contract_id, exchangeable_amount - BigInt(exchange_amount));
+        // 타이머 재설정
+        this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
 
         return promise.asReturn();
     }
@@ -510,6 +510,7 @@ export class Exchange {
     /* private functions */
 
     _get_distribute_amount(ft_contract_id: AccountId): bigint {
+        // 교환 가능한 양 + (인상 양 * (현재 시간 - 마지막 시간))
         return this._get_distribute_amout(ft_contract_id) + this._get_distribute_rate(ft_contract_id) * (this._get_interval_count(ft_contract_id) - this._get_distribute_time(ft_contract_id));
     }
 

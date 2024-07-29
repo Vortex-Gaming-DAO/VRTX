@@ -4,8 +4,10 @@
   "license": "(MIT AND Apache-2.0)",
   "scripts": {
     "deploy": "cd contract && npm run deploy",
-    "build": "npm run build:contract",
-    "build:contract": "cd contract && npm run build",
+    "buildV1": "npm run buildV1:contract",
+    "buildV2": "npm run buildV2:contract",
+    "buildV1:contract": "cd contract && npm run buildV1",
+    "buildV2:contract": "cd contract && npm run buildV2",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "cd contract && npm test",
     "test:integration": "npm run build:contract && cd integration-tests && npm test -- -- \"./contract/build/hello_near.wasm\"",

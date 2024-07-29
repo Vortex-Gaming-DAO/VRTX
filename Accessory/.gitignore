@@ -6,8 +6,10 @@ node_modules
 .pnp.js
 
 # build
-/contract/build
+/contract/build*
+/contract/deploy.sh
 /contract/neardev
+*V1
 
 # misc
 .DS_Store
@@ -22,3 +24,8 @@ yarn-debug.log*
 yarn-error.log*
 
 README.md
+
+buildV1.sh
+contractV1.ts
+
+scripts.txt

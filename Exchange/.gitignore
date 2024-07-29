@@ -6,7 +6,8 @@ node_modules
 .pnp.js
 
 # build
-/contract/build
+/contract/buildV1
+/contract/buildV2
 /contract/neardev
 
 # misc
@@ -22,3 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 README.md
+
+buildV1.sh
+contractV1.ts
+contract
+
+scripts.txt

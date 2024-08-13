@@ -275,10 +275,10 @@ class Accessory {
         const token_sender_key   = `${sender_id}:${token_id}`;
     
         const amount_to_transfer = BigInt(amount);
-        assert(this.token_balances.get(token_sender_key) >= amount_to_transfer, "Insufficient balance");
+        assert(this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) >= amount_to_transfer, "Insufficient balance");
 
-        this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key) - amount_to_transfer);
-        this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key) + amount_to_transfer);
+        this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
+        this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
     }
 
     @call({})

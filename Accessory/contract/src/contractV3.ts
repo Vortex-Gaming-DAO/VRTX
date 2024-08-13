@@ -202,6 +202,16 @@ class Accessory {
         const sender_id = near.signerAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
+        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
+        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+
+        for (let index = 0; index < token_ids.length; ++index) {
+            const token_id = token_ids[index];
+            const amount = amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `amount must be positive`);
+        }
 
         for (let index = 0; index < token_ids.length; ++index) {
             const token_owner_key = `${token_owner_id}:${token_ids[index]}`;
@@ -223,6 +233,16 @@ class Accessory {
         const sender_id = near.predecessorAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
+        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
+        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+
+        for (let index = 0; index < token_ids.length; ++index) {
+            const token_id = token_ids[index];
+            const amount = amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `amount must be positive`);
+        }
 
         for (let index = 0; index < token_ids.length; ++index) {
             const token_receiver_key = `nft:${nft_token_id}:${token_ids[index]}`;
@@ -246,6 +266,16 @@ class Accessory {
         const sender_id = near.predecessorAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
+        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
+        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+
+        for (let index = 0; index < token_ids.length; ++index) {
+            const token_id = token_ids[index];
+            const amount = amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `amount must be positive`);
+        }
 
         for (let index = 0; index < token_ids.length; ++index) {
             const token_sender_key   = `nft:${nft_token_id}:${token_ids[index]}`;
@@ -270,6 +300,9 @@ class Accessory {
         const sender_id = near.predecessorAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
+        assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+        assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+        assert(BigInt(amount) > 0, `amount must be positive`);
 
         const token_receiver_key = `${receiver_id}:${token_id}`;
         const token_sender_key   = `${sender_id}:${token_id}`;
@@ -292,6 +325,16 @@ class Accessory {
         const sender_id = near.predecessorAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
+        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
+        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+
+        for (let index = 0; index < token_ids.length; ++index) {
+            const token_id = token_ids[index];
+            const amount = amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `amount must be positive`);
+        }
 
         for (let index = 0; index < token_ids.length; ++index) {
             const token_receiver_key = `${receiver_id}:${token_ids[index]}`;
@@ -384,6 +427,8 @@ class Accessory {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+        
         const token: Token = {
             token_id,
             owner_id: null,
@@ -405,6 +450,7 @@ class Accessory {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
         const token: Token = {
             token_id,
             owner_id: null,
@@ -425,6 +471,7 @@ class Accessory {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
         if(!this.token_base_metadatas.get(token_id)) {
             this.token_indices.set(this.token_count.toString(), token_id);
             this.token_count += 1;
@@ -645,5 +692,14 @@ class Accessory {
             const token_owner_key = `nft:${nft_token_id}:${token_id}`;
             return this.token_balances.get(token_owner_key, { defaultValue: BigInt(0) });
         });
+    }
+
+    valid_bigint({ value }: { value: string | number }): boolean {
+        try {
+            BigInt(value);
+            return true;
+        } catch {
+            return false;
+        }
     }
 }

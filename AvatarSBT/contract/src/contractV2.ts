@@ -1,4 +1,4 @@
-import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey } from "near-sdk-js";
+import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, validateAccountId } from "near-sdk-js";
 import { near, initialize, call, view, assert } from "near-sdk-js";
 import { NonFungibleToken } from "near-contract-standards/lib";
 import { NonFungibleTokenCore } from "near-contract-standards/lib/non_fungible_token/core";
@@ -94,6 +94,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
     }): void {
         const sender_id = near.signerAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
+        assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
 
         this.tokens.internal_mint(token_id, token_owner_id, token_metadata);
         this.token_locks.set(token_id, locked || false);
@@ -107,6 +108,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         memo?: string
     }): void {
         assert(!this.is_sbt, "SBT can not be transfered");
+        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
 
         this.tokens.nft_transfer({ receiver_id, token_id, approval_id, memo });
     }
@@ -120,6 +122,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         msg: string
     }): NearPromise {
         assert(!this.is_sbt, "SBT can not be transfered");
+        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
 
         return this.tokens.nft_transfer_call({ receiver_id, token_id, approval_id, memo, msg });
     }
@@ -176,6 +179,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.tokens.owner_id, "Sender is not the contract's owner");
         assert(!this.minters.get(account_id), "Account is already minter");
+        assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.minters.set(account_id, true);
     }
@@ -187,6 +191,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.tokens.owner_id, "Sender is not the contract's owner");
         assert(this.minters.get(account_id), "Account is not a minter");
+        assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.minters.set(account_id, false);
     }

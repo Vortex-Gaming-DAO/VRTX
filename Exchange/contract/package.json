@@ -6,6 +6,7 @@
   "scripts": {
     "buildV1": "./buildV1.sh",
     "buildV2": "./buildV2.sh",
+    "buildV3": "./buildV3.sh",
     "deploy": "./deploy.sh",
     "test": "echo use integration-tests"
   },

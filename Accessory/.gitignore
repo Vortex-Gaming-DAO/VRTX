@@ -29,3 +29,5 @@ buildV1.sh
 contractV1.ts
 
 scripts.txt
+
+deploy.sh

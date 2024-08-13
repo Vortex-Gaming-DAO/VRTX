@@ -8,6 +8,7 @@ node_modules
 # build
 /contract/build
 /contract/neardev
+/contract/src/contractV1.ts
 
 # misc
 .DS_Store

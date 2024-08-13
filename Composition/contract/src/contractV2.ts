@@ -1,4 +1,4 @@
-import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey } from "near-sdk-js";
+import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, validateAccountId } from "near-sdk-js";
 import { near, initialize, call, view, assert } from "near-sdk-js";
 import { TokenMetadata as NFTTokenMetadata } from "near-contract-standards/lib/non_fungible_token/metadata";
 
@@ -56,6 +56,7 @@ class Composition {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(!this.oracles.get(account_id), "Account is already minter");
+        assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.oracles.set(account_id, true);
     }
@@ -67,6 +68,7 @@ class Composition {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(this.oracles.get(account_id), "Account is not a minter");
+        assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.oracles.set(account_id, false);
     }
@@ -86,6 +88,7 @@ class Composition {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(validateAccountId(contract_id), "Contract ID is invalid");
 
         this.nft_contract_id = contract_id;
     }
@@ -101,6 +104,7 @@ class Composition {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(validateAccountId(contract_id), "Contract ID is invalid");
 
         this.mt_contract_id = contract_id;
     }
@@ -124,6 +128,7 @@ class Composition {
     }): NearPromise {
         const sender_id = near.signerAccountId();
         assert(this.oracles.get(sender_id), "Sender is not a oracle");
+        assert(validateAccountId(nft_token_owner_id), "NFT Token Owner ID is invalid");
 
         const promise = NearPromise.new(this.mt_contract_id)
             .functionCall(
@@ -162,6 +167,7 @@ class Composition {
         mt_lock_token_ids: string[],
         mt_lock_amounts: (string | number)[]
     }): NearPromise | boolean {
+        assert(validateAccountId(nft_token_owner_id), "NFT Token Owner ID is invalid");
         try {
             near.promiseResult(0);
         } catch {

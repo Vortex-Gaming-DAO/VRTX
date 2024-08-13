@@ -4,7 +4,8 @@
   "license": "(MIT AND Apache-2.0)",
   "type": "module",
   "scripts": {
-    "build": "./build.sh",
+    "buildV1": "./buildV1.sh",
+    "buildV2": "./buildV2.sh",
     "deploy": "./deploy.sh",
     "test": "echo use integration-tests"
   },

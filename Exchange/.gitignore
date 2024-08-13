@@ -9,6 +9,9 @@ node_modules
 /contract/buildV1
 /contract/buildV2
 /contract/neardev
+/contract/src/contract.ts
+/contract/src/contractV1.ts
+/contract/src/contractV2.ts
 
 # misc
 .DS_Store
@@ -25,7 +28,5 @@ yarn-error.log*
 README.md
 
 buildV1.sh
-contractV1.ts
-contract
 
 scripts.txt

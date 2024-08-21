@@ -1,4 +1,4 @@
-import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, near, initialize, call, view, assert, migrate, validateAccountId } from "near-sdk-js";
+import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, near, initialize, call, view, assert, migrate, validateAccountId, bytes } from "near-sdk-js";
 import { NearEvent } from "near-contract-standards/lib/event";
 
 const FIVE_TGAS = BigInt("50000000000000");
@@ -420,8 +420,9 @@ export class Exchange {
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(validateAccountId(recipient), "Recipient ID is invalid");
 
-        assert(!this.signatures.get(signature_id, { defaultValue: false }), "Signature is reused");
-        this.signatures.set(signature_id, true);
+        const signature_hash = recipient + ":" + signature_id;
+        assert(!this.signatures.get(signature_hash, { defaultValue: false }), "Signature is reused");
+        this.signatures.set(signature_hash, true);
 
         // 교환 VRTX양 = 교환하고자 하는 VOR 포인트 * 교환비 (가중치 빠져있음)
         const exchange_amount = BigInt(amount) * this._get_exchange_ratio(ft_contract_id) / BigInt(1000);

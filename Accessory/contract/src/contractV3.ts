@@ -351,11 +351,7 @@ class Accessory {
         memo: string | null,
         msg: string
     }): NearPromise {
-        const sender_id = near.predecessorAccountId();
-        assert(this.minters.get(sender_id), "Sender is not a minter");
-        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
-
-        return NearPromise.new(receiver_id);
+        throw new Error("not supported");
     }
 
     @call({})
@@ -367,11 +363,7 @@ class Accessory {
         memo: string | null,
         msg: string
     }): NearPromise {
-        const sender_id = near.predecessorAccountId();
-        assert(this.minters.get(sender_id), "Sender is not a minter");
-        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
-
-        return NearPromise.new(receiver_id);
+        throw new Error("not supported");
     }
 
     /* minter management */

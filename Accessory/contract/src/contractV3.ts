@@ -224,64 +224,58 @@ class Accessory {
     }
 
     @call({})
-    mt_lock({ nft_token_id, token_owner_id, token_ids, amounts }: {
+    mt_lock_and_unlock({ nft_token_id, token_owner_id, lock_token_ids, lock_amounts, unlock_token_ids, unlock_amounts }: {
         nft_token_id: NFTTokenId,
         token_owner_id: AccountId,
-        token_ids: string[],
-        amounts:  (string | number)[] /* bigint */
+        lock_token_ids: string[],
+        lock_amounts:  (string | number)[],
+        unlock_token_ids: string[],
+        unlock_amounts:  (string | number)[],
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(this.minters.get(sender_id), "Sender is not a minter");
         assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
-        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
-        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+        assert(Array.isArray(lock_token_ids) && Array.isArray(lock_amounts), "lock_token_ids and lock_amounts must be an array.");
+        assert(lock_token_ids.length === lock_amounts.length, "The length of lock_token_ids and lock_amounts must be the same.");
+        assert(Array.isArray(unlock_token_ids) && Array.isArray(unlock_amounts), "unlock_token_ids and unlock_amounts must be an array.");
+        assert(unlock_token_ids.length === unlock_amounts.length, "The length of unlock_token_ids and unlock_amounts must be the same.");
 
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_id = token_ids[index];
-            const amount = amounts[index];
+        // lock check
+        for (let index = 0; index < lock_token_ids.length; ++index) {
+            const token_id = lock_token_ids[index];
+            const amount = lock_amounts[index];
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
             assert(BigInt(amount) > 0, `amount must be positive`);
         }
 
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_receiver_key = `nft:${nft_token_id}:${token_ids[index]}`;
-            const token_sender_key   = `${token_owner_id}:${token_ids[index]}`;
+        // unlock check
+        for (let index = 0; index < unlock_token_ids.length; ++index) {
+            const token_id = unlock_token_ids[index];
+            const amount = unlock_amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `amount must be positive`);
+        }
 
-            const amount_to_transfer = BigInt(amounts[index]);
+        // lock
+        for (let index = 0; index < lock_token_ids.length; ++index) {
+            const token_receiver_key = `nft:${nft_token_id}:${lock_token_ids[index]}`;
+            const token_sender_key   = `${token_owner_id}:${lock_token_ids[index]}`;
+
+            const amount_to_transfer = BigInt(lock_amounts[index]);
             assert(this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) >= amount_to_transfer, "Insufficient balance");
     
             this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
             this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
         }
-    }
 
-    @call({})
-    mt_unlock({ nft_token_id, token_owner_id, token_ids, amounts }: {
-        nft_token_id: NFTTokenId,
-        token_owner_id: AccountId,
-        token_ids: string[],
-        amounts:  (string | number)[] /* bigint */
-    }): void {
-        const sender_id = near.predecessorAccountId();
-        assert(this.minters.get(sender_id), "Sender is not a minter");
-        assert(validateAccountId(token_owner_id), "Token Owner ID is invalid");
-        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
-        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+        // unlock
+        for (let index = 0; index < unlock_token_ids.length; ++index) {
+            const token_sender_key   = `nft:${nft_token_id}:${unlock_token_ids[index]}`;
+            const token_receiver_key = `${token_owner_id}:${unlock_token_ids[index]}`;
 
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_id = token_ids[index];
-            const amount = amounts[index];
-            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
-            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
-        }
-
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_sender_key   = `nft:${nft_token_id}:${token_ids[index]}`;
-            const token_receiver_key = `${token_owner_id}:${token_ids[index]}`;
-
-            const amount_to_transfer = BigInt(amounts[index]);
+            const amount_to_transfer = BigInt(unlock_amounts[index]);
             assert(this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) >= amount_to_transfer, "Insufficient balance");
     
             this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);

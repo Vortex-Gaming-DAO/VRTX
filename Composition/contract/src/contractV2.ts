@@ -129,66 +129,24 @@ class Composition {
         const sender_id = near.signerAccountId();
         assert(this.oracles.get(sender_id), "Sender is not a oracle");
         assert(validateAccountId(nft_token_owner_id), "NFT Token Owner ID is invalid");
-
+        
         const promise = NearPromise.new(this.mt_contract_id)
             .functionCall(
-                "mt_unlock", 
+                "mt_lock_and_unlock", 
                 JSON.stringify({ 
                     nft_token_id: nft_token_id, 
                     token_owner_id: nft_token_owner_id, 
-                    token_ids: mt_unlock_token_ids, 
-                    amounts: mt_unlock_amounts 
+                    lock_token_ids: mt_lock_token_ids,
+                    lock_amounts: mt_lock_amounts,
+                    unlock_token_ids: mt_unlock_token_ids, 
+                    unlock_amounts: mt_unlock_amounts 
                 }), 
                 NO_DEPOSIT,
                 TWENTY_TGAS
             )
             .then(NearPromise.new(near.currentAccountId())
                 .functionCall(
-                    "mt_unlock_callback", 
-                    JSON.stringify({
-                        nft_token_id: nft_token_id,
-                        nft_token_owner_id: nft_token_owner_id,
-                        nft_token_metadata: nft_token_metadata,
-                        mt_lock_token_ids: mt_lock_token_ids, 
-                        mt_lock_amounts: mt_lock_amounts, 
-                    }), 
-                    NO_DEPOSIT, 
-                    HUNDRED_TGAS
-                ));
-
-        return promise.asReturn();
-    }
-
-    @call({ privateFunction: true })
-    mt_unlock_callback({ nft_token_id, nft_token_owner_id, nft_token_metadata, mt_lock_token_ids, mt_lock_amounts }: {
-        nft_token_id: string,
-        nft_token_owner_id: string,
-        nft_token_metadata: NFTTokenMetadata,
-        mt_lock_token_ids: string[],
-        mt_lock_amounts: (string | number)[]
-    }): NearPromise | boolean {
-        assert(validateAccountId(nft_token_owner_id), "NFT Token Owner ID is invalid");
-        try {
-            near.promiseResult(0);
-        } catch {
-            return false;
-        }
-
-        const promise = NearPromise.new(this.mt_contract_id)
-            .functionCall(
-                "mt_lock", 
-                JSON.stringify({ 
-                    nft_token_id: nft_token_id, 
-                    token_owner_id: nft_token_owner_id, 
-                    token_ids: mt_lock_token_ids, 
-                    amounts: mt_lock_amounts 
-                }), 
-                NO_DEPOSIT, 
-                TWENTY_TGAS
-            )
-            .then(NearPromise.new(near.currentAccountId())
-                .functionCall(
-                    "mt_lock_callback", 
+                    "mt_lock_and_unlock_callback", 
                     JSON.stringify({
                         nft_token_id: nft_token_id,
                         nft_token_metadata: nft_token_metadata
@@ -201,7 +159,7 @@ class Composition {
     }
 
     @call({ privateFunction: true })
-    mt_lock_callback({ nft_token_id, nft_token_metadata }: {
+    mt_lock_and_unlock_callback({ nft_token_id, nft_token_metadata }: {
         nft_token_id: string,
         nft_token_metadata: NFTTokenMetadata
     }): NearPromise | boolean {

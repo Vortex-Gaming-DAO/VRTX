@@ -419,6 +419,8 @@ export class Exchange {
         assert(this.restrict_to_oracle || sender_id === recipient, "Sender and recipient are not the same");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(validateAccountId(recipient), "Recipient ID is invalid");
+        assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+        assert(BigInt(amount) > 0, `amount must be positive`);
 
         const signature_hash = recipient + ":" + signature_id;
         assert(!this.signatures.get(signature_hash, { defaultValue: false }), "Signature is reused");
@@ -549,5 +551,14 @@ export class Exchange {
 
     _get_interval_count(ft_contract_id: AccountId): bigint {
         return this._get_block_timestamp_in_sec() / this._get_interval_distribute_time(ft_contract_id);
+    }
+
+    valid_bigint({ value }: { value: string | number }): boolean {
+        try {
+            BigInt(value);
+            return true;
+        } catch {
+            return false;
+        }
     }
 }

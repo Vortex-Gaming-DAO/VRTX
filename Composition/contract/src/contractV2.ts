@@ -129,7 +129,27 @@ class Composition {
         const sender_id = near.signerAccountId();
         assert(this.oracles.get(sender_id), "Sender is not a oracle");
         assert(validateAccountId(nft_token_owner_id), "NFT Token Owner ID is invalid");
-        
+        assert(this.valid_bigint({ value: nft_token_id }), `NFT Token ID '${nft_token_id}' is not a valid number`);
+        assert(Array.isArray(mt_lock_token_ids) && Array.isArray(mt_lock_amounts), "mt_lock_token_ids and mt_lock_amounts must be an array.");
+        assert(mt_lock_token_ids.length === mt_lock_amounts.length, "The length of lock_token_ids and mt_lock_amounts must be the same.");
+        assert(Array.isArray(mt_unlock_token_ids) && Array.isArray(mt_unlock_amounts), "mt_unlock_token_ids and mt_unlock_amounts must be an array.");
+        assert(mt_unlock_token_ids.length === mt_unlock_amounts.length, "The length of mt_unlock_token_ids and mt_unlock_amounts must be the same.");
+
+        for (let index = 0; index < mt_lock_token_ids.length; ++index) {
+            const token_id = mt_lock_token_ids[index];
+            const amount = mt_lock_amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `MT Lock Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `MT Lock Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `MT Lock amount must be positive`);
+        }
+        for (let index = 0; index < mt_unlock_token_ids.length; ++index) {
+            const token_id = mt_unlock_token_ids[index];
+            const amount = mt_unlock_amounts[index];
+            assert(this.valid_bigint({ value: token_id }), `MT Unlock Token ID '${token_id}' is not a valid number`);
+            assert(this.valid_bigint({ value: amount }), `MT Unlock Amount '${amount}' is not a valid number`);
+            assert(BigInt(amount) > 0, `MT Unlock amount must be positive`);
+        }
+
         const promise = NearPromise.new(this.mt_contract_id)
             .functionCall(
                 "mt_lock_and_unlock", 
@@ -199,5 +219,14 @@ class Composition {
         }
 
         return true;
+    }
+
+    valid_bigint({ value }: { value: string | number }): boolean {
+        try {
+            BigInt(value);
+            return true;
+        } catch {
+            return false;
+        }
     }
 }

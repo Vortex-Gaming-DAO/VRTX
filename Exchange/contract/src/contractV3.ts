@@ -584,8 +584,8 @@ export class Exchange {
         signature_id: string
     }): NearPromise {
         const sender_id = near.signerAccountId();
-        assert(!this.restrict_to_oracle || this.oracles.get(sender_id), "Sender is not a oracle");
-        assert(this.restrict_to_oracle || sender_id === recipient, "Sender and recipient are not the same");
+        assert(this.oracles.get(sender_id), "Sender is not a oracle");
+        assert(sender_id === recipient, "Sender and recipient are not the same");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(validateAccountId(recipient), "Recipient ID is invalid");
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
@@ -608,7 +608,7 @@ export class Exchange {
         // assert(exchange_amount * this._get_exchange_guard_rate(ft_contract_id) / BigInt(1000) <= exchangeable_amount, "Too much exchange amount");
 
         // 교환 가능 토큰 체크
-        const distributor = this.distributors.get(ft_contract_id);
+        const distributor = this.distributors.get(ft_contract_id, { defaultValue: "" });
 
         // 교환 가능 토큰이어야 통과
         assert(distributor !== "", "Token is not exchangeable");

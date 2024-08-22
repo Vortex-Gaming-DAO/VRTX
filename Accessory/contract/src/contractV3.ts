@@ -2,6 +2,7 @@ import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, validat
 import { near, initialize, call, view, assert, migrate } from "near-sdk-js";
 import { TokenId as NFTTokenId } from "near-contract-standards/lib/non_fungible_token/token";
 import { Option } from "near-contract-standards/lib/non_fungible_token/utils";
+import { NearEvent } from "near-contract-standards/lib/event";
 
 class MTContractMetadata {
     spec: string; // 필수. 버전 정보를 나타내는 문자열. 예를 들어 "mt-1.0.0".
@@ -67,43 +68,180 @@ class Token {
     }
 }
 
-/* Events */
+//#region Events
+class Nep245Event extends NearEvent {
+    version: string;
+    event_kind: any[];
 
-type MtEvent = "mt_mint" | "mt_burn" | "mt_transfer";
-
-interface MtEventLogData {
-    EVENT_JSON: {
-        standard: "nep245",
-        version: "1.0.0",
-        event: MtEvent,
-        data: MtMintLog[] | MtBurnLog[] | MtTransferLog[]
+    constructor(version, event_kind) {
+        super();
+        this.version = version;
+        this.event_kind = event_kind;
     }
 }
 
-interface MtMintLog {
-    owner_id: string,
-    token_ids: string[],
-    amounts: string[],
-    memo?: string
+class MtMint {
+    token_ids: string[];
+    amounts: (string | number)[];
+    token_owner_id: AccountId;
+    constructor(token_ids: string[], amounts: (string | number)[], token_owner_id: AccountId) {
+        this.token_ids = token_ids;
+        this.amounts = amounts;
+        this.token_owner_id = token_owner_id;
+    }
+  
+    emit() {
+        MtMint.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
 }
 
-interface MtBurnLog {
-    owner_id: string,
-    authorized_id?: string,
-    token_ids: string[],
-    amounts: string[],
-    memo?: string
+class MtLockAndUnLock {
+    nft_token_id: NFTTokenId;
+    token_owner_id: AccountId;
+    lock_token_ids: string[];
+    lock_amounts:  (string | number)[];
+    unlock_token_ids: string[];
+    unlock_amounts:  (string | number)[];
+    constructor(nft_token_id: NFTTokenId, token_owner_id: AccountId, lock_token_ids: string[], lock_amounts:  (string | number)[], unlock_token_ids: string[], unlock_amounts:  (string | number)[]) {
+        this.nft_token_id = nft_token_id;
+        this.token_owner_id = token_owner_id;
+        this.lock_token_ids = lock_token_ids;
+        this.lock_amounts = lock_amounts;
+        this.unlock_token_ids = unlock_token_ids;
+        this.unlock_amounts = unlock_amounts;
+    }
+  
+    emit() {
+        MtLockAndUnLock.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
 }
 
-interface MtTransferLog {
-    authorized_id?: string,
-    old_owner_id: string,
-    new_owner_id: string,
-    token_ids: string[],
-    amounts: string[],
-    memo?: string
+class MtTransfer {
+    sender_id: AccountId;
+    receiver_id: AccountId;
+    token_ids: string[];
+    amounts: (string | number)[];
+    approvals: ([ owner_id: AccountId, approval_id: number ] | null)[];
+    memo: string | null;
+    constructor(sender_id: AccountId, receiver_id: AccountId, token_ids: string[], amounts: (string | number)[], approvals: ([ owner_id: AccountId, approval_id: number ] | null)[], memo: string | null) {
+        this.sender_id = sender_id;
+        this.receiver_id = receiver_id;
+        this.token_ids = token_ids;
+        this.amounts = amounts;
+        this.approvals = approvals;
+        this.memo = memo;
+    }
+  
+    emit() {
+        MtTransfer.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
 }
 
+class AddMinter {
+    account_id: AccountId;
+    constructor(account_id) {
+        this.account_id = account_id;
+    }
+  
+    emit() {
+      AddMinter.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+class RevekeMinter {
+    account_id: AccountId;
+    constructor(account_id) {
+        this.account_id = account_id;
+    }
+  
+    emit() {
+        RevekeMinter.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+class UpdateMetadataEvent {
+    metadata: MTContractMetadata;
+    constructor(metadata: MTContractMetadata) {
+        this.metadata = metadata;
+    }
+  
+    emit() {
+        UpdateMetadataEvent.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+class UpdateAllTokenMetadataEvent {
+    token_id: string;
+    token_metadata: MTTokenMetadata;
+    base_token_metadata: MTBaseTokenMetadata;
+    constructor(token_id: string, token_metadata: MTTokenMetadata, base_token_metadata: MTBaseTokenMetadata) {
+        this.token_id = token_id;
+        this.token_metadata = token_metadata;
+        this.base_token_metadata = base_token_metadata;
+    }
+  
+    emit() {
+        UpdateAllTokenMetadataEvent.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+class UpdateTokenMetadataEvent {
+    token_id: string;
+    token_metadata: MTTokenMetadata;
+    constructor(token_id: string, token_metadata: MTTokenMetadata) {
+        this.token_id = token_id;
+        this.token_metadata = token_metadata;
+    }
+  
+    emit() {
+        UpdateTokenMetadataEvent.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+class UpdateBaseTokenMetadata {
+    token_id: string;
+    base_token_metadata: MTBaseTokenMetadata;
+    constructor(token_id: string, base_token_metadata: MTBaseTokenMetadata) {
+        this.token_id = token_id;
+        this.base_token_metadata = base_token_metadata;
+    }
+  
+    emit() {
+        UpdateBaseTokenMetadata.emit_many([this]);
+    }
+    static emit_many(data) {
+        new_245_v1(data).emit();
+    }
+}
+
+function new_245_v1(event_kind) {
+    return new Nep245Event('1.0.0', event_kind);
+}
+//#endregion
 /* storages */
 
 class StorageKey {}
@@ -221,6 +359,7 @@ class Accessory {
             this.token_balances.set(token_owner_key, balance + BigInt(amounts[index]));
             this.token_supplies.set(token_ids[index], supply + BigInt(amounts[index]));
         }
+        new MtMint(token_ids, amounts, token_owner_id).emit();
     }
 
     @call({})
@@ -281,6 +420,8 @@ class Accessory {
             this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
             this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
         }
+
+        new MtLockAndUnLock(nft_token_id, token_owner_id, lock_token_ids, lock_amounts, unlock_token_ids, unlock_amounts).emit();
     }
 
     @call({})
@@ -306,6 +447,8 @@ class Accessory {
 
         this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
         this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
+
+        new MtTransfer(sender_id, receiver_id, [token_id], [amount], [approval], memo).emit();
     }
 
     @call({})
@@ -340,6 +483,7 @@ class Accessory {
             this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key) - amount_to_transfer);
             this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key) + amount_to_transfer);
         }
+        new MtTransfer(receiver_id, token_ids, amounts, approvals, memo).emit();
     }
 
     @call({})
@@ -378,6 +522,8 @@ class Accessory {
         assert(!this.minters.get(account_id), "Account is already minter");
 
         this.minters.set(account_id, true);
+
+        new AddMinter(account_id).emit();
     }
 
     @call({})
@@ -390,6 +536,7 @@ class Accessory {
         assert(this.minters.get(account_id), "Account is not a minter");
 
         this.minters.set(account_id, false);
+        new RevekeMinter(account_id).emit();
     }
 
     /* metadata management */
@@ -403,6 +550,8 @@ class Accessory {
 
         this.metadata = metadata;
         this.metadata.assert_valid();
+
+        new UpdateMetadataEvent(metadata);
     }
 
     @call({})
@@ -427,6 +576,7 @@ class Accessory {
         }
         this.tokens.set(token_id, token);
         this.token_base_metadatas.set(token_id, base_token_metadata);
+        new UpdateAllTokenMetadataEvent(token_id, token_metadata, base_token_metadata).emit();
     }
 
     @call({})
@@ -448,6 +598,7 @@ class Accessory {
             this.token_count += 1;
         }
         this.tokens.set(token_id, token);
+        new UpdateTokenMetadataEvent(token_id, token_metadata).emit();
     }
 
     @call({})
@@ -463,6 +614,7 @@ class Accessory {
             this.token_count += 1;
         }
         this.token_base_metadatas.set(token_id, base_token_metadata);
+        new UpdateBaseTokenMetadata(token_id, base_token_metadata).emit();
     }
 
     /* VIEW */

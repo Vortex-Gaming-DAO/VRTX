@@ -422,7 +422,7 @@ export class Exchange {
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(validateAccountId(recipient), "Recipient ID is invalid");
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-        assert(BigInt(amount) >= 0, `amount must be positive`);
+        assert(BigInt(amount) > 0, `amount must be positive`);
 
         const signature_hash = this.toHexString({byteArray: near.sha256(bytes(recipient + ":" +  signature_id))});
         assert(!this.signatures.get(signature_hash, { defaultValue: false }), "Signature is reused");

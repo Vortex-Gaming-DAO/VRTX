@@ -323,7 +323,7 @@ export class Exchange {
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
         assert(BigInt(amount) >= 0, `amount must be positive`);
-        
+
         this.minimum_exchangeable_amounts.set(ft_contract_id, BigInt(amount));
     }
 
@@ -424,7 +424,7 @@ export class Exchange {
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
         assert(BigInt(amount) >= 0, `amount must be positive`);
 
-        const signature_hash = recipient + ":" + signature_id;
+        const signature_hash = this.toHexString({byteArray: near.sha256(bytes(recipient + ":" +  signature_id))});
         assert(!this.signatures.get(signature_hash, { defaultValue: false }), "Signature is reused");
         this.signatures.set(signature_hash, true);
 
@@ -562,5 +562,11 @@ export class Exchange {
         } catch {
             return false;
         }
+    }
+
+    toHexString({ byteArray }: { byteArray: Uint8Array }): string {
+        return Array.from(byteArray)
+            .map(byte => byte.toString(16).padStart(2, '0'))
+            .join('');
     }
 }

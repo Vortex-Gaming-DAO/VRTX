@@ -483,7 +483,7 @@ class Accessory {
             this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key) - amount_to_transfer);
             this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key) + amount_to_transfer);
         }
-        new MtTransfer(receiver_id, token_ids, amounts, approvals, memo).emit();
+        new MtTransfer(sender_id, receiver_id, token_ids, amounts, approvals, memo).emit();
     }
 
     @call({})

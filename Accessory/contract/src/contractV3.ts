@@ -210,7 +210,7 @@ class Accessory {
             const amount = amounts[index];
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
+            assert(BigInt(amount) >= 0, `amount must be positive`);
         }
 
         for (let index = 0; index < token_ids.length; ++index) {
@@ -246,7 +246,7 @@ class Accessory {
             const amount = lock_amounts[index];
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
+            assert(BigInt(amount) >= 0, `amount must be positive`);
         }
 
         // unlock check
@@ -255,7 +255,7 @@ class Accessory {
             const amount = unlock_amounts[index];
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
+            assert(BigInt(amount) >= 0, `amount must be positive`);
         }
 
         // lock
@@ -296,7 +296,7 @@ class Accessory {
         assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
         assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-        assert(BigInt(amount) > 0, `amount must be positive`);
+        assert(BigInt(amount) >= 0, `amount must be positive`);
 
         const token_receiver_key = `${receiver_id}:${token_id}`;
         const token_sender_key   = `${sender_id}:${token_id}`;
@@ -327,7 +327,7 @@ class Accessory {
             const amount = amounts[index];
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
+            assert(BigInt(amount) >= 0, `amount must be positive`);
         }
 
         for (let index = 0; index < token_ids.length; ++index) {

@@ -278,11 +278,14 @@ export class Exchange {
     @call({})
     set_exchange_ratio({ ft_contract_id, ratio }: {
         ft_contract_id: AccountId,
-        ratio: string | number /* bigint, decimal 3 */
+        ratio: string | number
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
+        assert(this.valid_bigint({ value: ratio }), `Ratio '${ratio}' is not a valid number`);
+        // exchange_ratio가 1000이 되어야 교환비는 1이 됨.
+        assert(BigInt(ratio) >= 0 && BigInt(ratio) < 10000, `Ratio '${ratio}' is not a valid number`);
         
         this.exchange_ratios.set(ft_contract_id, BigInt(ratio));
     }
@@ -297,12 +300,15 @@ export class Exchange {
     @call({})
     set_exchange_fee_ratio({ ft_contract_id, ratio }: {
         ft_contract_id: AccountId,
-        ratio: string | number /* bigint, decimal 3 */
+        ratio: string | number
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
-        
+        assert(this.valid_bigint({ value: ratio }), `Ratio '${ratio}' is not a valid number`);
+        // exchange_fee_ratio가 10이 되어야 수수료는 1%가 됨.
+        assert(BigInt(ratio) >= 0 && BigInt(ratio) < 1000, `Ratio '${ratio}' is not a valid number`);
+
         this.exchange_fee_ratios.set(ft_contract_id, BigInt(ratio));
     }
 
@@ -334,6 +340,7 @@ export class Exchange {
         return this._get_minimum_exchangeable_amount(ft_contract_id);
     }
 
+    // exchage_guard_rates는 사용되지 않음
     @call({})
     set_exchange_guard_rate({ ft_contract_id, rate }: {
         ft_contract_id: AccountId,
@@ -341,6 +348,8 @@ export class Exchange {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
+        assert(this.valid_bigint({ value: rate }), `rate '${rate}' is not a valid number`);
+        assert(BigInt(rate) >= 0 && BigInt(rate) < 1000, `rate '${rate}' is not a valid number`);
 
         this.exchage_guard_rates.set(ft_contract_id, BigInt(rate));
     }
@@ -434,11 +443,11 @@ export class Exchange {
         const exchangeable_amount = this._get_distribute_amount(ft_contract_id);
 
         // 교환 가능한 양이 최소 교환 가능양보다 커야 통과
-        assert(exchangeable_amount >= this._get_minimum_exchangeable_amount(ft_contract_id), "Not enough exchangeable amount");
+        // assert(exchangeable_amount >= this._get_minimum_exchangeable_amount(ft_contract_id), "Not enough exchangeable amount");
         // 교환 가능한 양이 교환 VRTX양보다 커야 통과
         assert(exchangeable_amount >= BigInt(exchange_amount), "Exceeded exchangeable amount");
         // 교환 VRTX양 * 방어양이 교환 가능한 양보다 작아야 통과
-        assert(exchange_amount * this._get_exchange_guard_rate(ft_contract_id) / BigInt(1000) <= exchangeable_amount, "Too much exchange amount");
+        // assert(exchange_amount * this._get_exchange_guard_rate(ft_contract_id) / BigInt(1000) <= exchangeable_amount, "Too much exchange amount");
 
         // 교환 가능 토큰 체크
         const distributor = this.distributors.get(ft_contract_id);

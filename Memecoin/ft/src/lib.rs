@@ -26,11 +26,33 @@ use near_sdk::collections::{LazyOption, LookupMap};
 use near_sdk::json_types::U128;
 use near_sdk::{env, log, near_bindgen, AccountId, Balance, PanicOnDefault, PromiseOrValue};
 use near_sdk::assert_one_yocto;
+use serde::Serialize;
+
+#[derive(Serialize)]
+pub struct LogData {
+    event: String,
+    details: String,
+}
+
+impl LogData {
+    fn to_json_string(&self) -> String {
+        #[allow(clippy::redundant_closure)]
+        serde_json::to_string(self).ok().unwrap_or_else(|| env::abort())
+    }
+}
 
 fn emit_event(event_name: &str, details: &str) {
-    let log_message = format!("{{\"event\": \"{}\", \"details\": \"{}\"}}", event_name, details);
-    env::log_str(&log_message);
+    let log_data = LogData {
+        event: event_name.to_string(),
+        details: details.to_string(),
+    };
+    env::log_str(&log_data.to_json_string());
 }
+
+// fn emit_event(event_name: &str, details: &str) {
+//     let log_message = format!("{{\"event\": \"{}\", \"details\": \"{}\"}}", event_name, details);
+//     env::log_str(&log_message);
+// }
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, PanicOnDefault)]

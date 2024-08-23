@@ -576,7 +576,7 @@ export class Exchange {
 
     /* */
 
-    @call({})
+    @call({ payableFunction: true })
     exchange_token({ ft_contract_id, amount, recipient, signature_id }: {
         ft_contract_id: AccountId,
         amount: number,

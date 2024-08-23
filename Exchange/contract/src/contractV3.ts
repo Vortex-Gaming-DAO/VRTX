@@ -583,6 +583,7 @@ export class Exchange {
         recipient: AccountId,
         signature_id: string
     }): NearPromise {
+        let initial_storage_usage = near.storageUsage();
         const sender_id = near.signerAccountId();
         assert(this.oracles.get(sender_id), "Sender is not a oracle");
         assert(sender_id === recipient, "Sender and recipient are not the same");
@@ -642,6 +643,11 @@ export class Exchange {
         this.distribute_amounts.set(ft_contract_id, exchangeable_amount - BigInt(exchange_amount));
         // 타이머 재설정
         this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
+        
+        // storage 사용량 확인
+        let storage_used = near.storageUsage() - initial_storage_usage;
+        let required_cost = near.storageByteCost() * storage_used;
+        assert(required_cost <= near.attachedDeposit(), `Must attach ${required_cost} yoctoNEAR to cover storage`);
 
         return promise.asReturn();
     }

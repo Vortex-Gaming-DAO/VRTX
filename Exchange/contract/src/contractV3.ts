@@ -586,7 +586,6 @@ export class Exchange {
         let initial_storage_usage = near.storageUsage();
         const sender_id = near.signerAccountId();
         assert(this.oracles.get(sender_id), "Sender is not a oracle");
-        assert(sender_id === recipient, "Sender and recipient are not the same");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(validateAccountId(recipient), "Recipient ID is invalid");
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);

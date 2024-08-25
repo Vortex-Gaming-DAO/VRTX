@@ -7,7 +7,7 @@ import { NonFungibleTokenEnumeration } from "near-contract-standards/lib/non_fun
 import { Token, TokenId } from "near-contract-standards/lib/non_fungible_token/token";
 import { Option } from "near-contract-standards/lib/non_fungible_token/utils";
 import { Nep171Event } from "near-contract-standards/lib";
-
+import { NearEvent } from "near-contract-standards/lib/event";
 
 class StorageKey {}
 
@@ -48,17 +48,17 @@ class StorageKeyMinter extends StorageKey implements IntoStorageKey {
 }
 
 //#region Event
-class AddMinter {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-      AddMinter.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_171_v1(data).emit();
+class CustomEventV1 extends NearEvent {
+        standard: string
+        version: string
+        event: string
+        data: any
+      constructor(event: string, data: any) {
+        super()
+        this.standard = "VRTX-Avatar"
+        this.version = "1.0.0"
+        this.event = event
+        this.data = data
     }
 }
 
@@ -250,7 +250,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.minters.set(account_id, true);
-        new AddMinter(account_id).emit();
+        new CustomEventV1("AddMinter", { account_id }).emit();
     }
 
     @call({})

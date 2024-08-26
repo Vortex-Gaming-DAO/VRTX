@@ -37,31 +37,17 @@ class CompositionEvent extends NearEvent {
     }
 }
 
-class AddOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-      AddOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-class RevekeOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
+class CustomEventV1 extends NearEvent {
+        standard: string
+        version: string
+        event: string
+        data: any
+    constructor(event: string, data: any) {
+        super()
+        this.standard = "VRTX-Composition"
+        this.version = "1.0.0"
+        this.event = event
+        this.data = data
     }
 }
 
@@ -160,7 +146,7 @@ class Composition {
 
         this.oracles.set(account_id, true);
 
-        new AddOracle(account_id).emit();
+        new CustomEventV1("AddOracle", { account_id }).emit();
     }
 
     @call({})
@@ -173,7 +159,7 @@ class Composition {
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.oracles.set(account_id, false);
-        new RevekeOracle(account_id).emit();
+        new CustomEventV1("RevekeOracle", { account_id }).emit();
     }
 
     @view({})

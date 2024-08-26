@@ -62,20 +62,6 @@ class CustomEventV1 extends NearEvent {
     }
 }
 
-class RevekeMinter {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeMinter.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_171_v1(data).emit();
-    }
-}
-
 class UpdateMetadataEvent {
     metadata: NFTContractMetadata;
     constructor(metadata: NFTContractMetadata) {
@@ -263,7 +249,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.minters.set(account_id, false);
-        new RevekeMinter(account_id).emit();
+        new CustomEventV1("RevekeMinter", { account_id }).emit();
     }
 
     @view({})

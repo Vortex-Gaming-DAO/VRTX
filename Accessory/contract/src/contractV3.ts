@@ -146,31 +146,18 @@ class MtTransfer {
     }
 }
 
-class AddMinter {
-    account_id: AccountId;
-    constructor(account_id) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-      AddMinter.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_245_v1(data).emit();
-    }
-}
-
-class RevekeMinter {
-    account_id: AccountId;
-    constructor(account_id) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeMinter.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_245_v1(data).emit();
+//#region Event
+class CustomEventV1 extends NearEvent {
+        standard: string
+        version: string
+        event: string
+        data: any
+    constructor(event: string, data: any) {
+        super()
+        this.standard = "VRTX-Accesorry"
+        this.version = "1.0.0"
+        this.event = event
+        this.data = data
     }
 }
 
@@ -523,7 +510,7 @@ class Accessory {
 
         this.minters.set(account_id, true);
 
-        new AddMinter(account_id).emit();
+        new CustomEventV1("AddMinter", { account_id }).emit();
     }
 
     @call({})
@@ -536,7 +523,7 @@ class Accessory {
         assert(this.minters.get(account_id), "Account is not a minter");
 
         this.minters.set(account_id, false);
-        new RevekeMinter(account_id).emit();
+        new CustomEventV1("RevekeMinter", { account_id }).emit();
     }
 
     /* metadata management */

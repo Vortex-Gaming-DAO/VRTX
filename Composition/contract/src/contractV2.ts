@@ -26,102 +26,20 @@ class StorageKeyOracle extends StorageKey implements IntoStorageKey {
 }
 
 //#region Events
-class CompositionEvent extends NearEvent {
-    version: string;
-    event_kind: any[];
-
-    constructor(version, event_kind) {
-        super();
-        this.version = version;
-        this.event_kind = event_kind;
+class CustomEventV1 extends NearEvent {
+        standard: string
+        version: string
+        event: string
+        data: any
+    constructor(event: string, data: any) {
+        super()
+        this.standard = "VRTX-Composition"
+        this.version = "1.0.0"
+        this.event = event
+        this.data = data
     }
 }
 
-class AddOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-      AddOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-class RevekeOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-class SetNftContract {
-    contract_id: AccountId;
-    constructor(contract_id: AccountId) {
-        this.contract_id = contract_id;
-    }
-  
-    emit() {
-        SetNftContract.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-class SetMtContract {
-    contract_id: AccountId;
-    constructor(contract_id: AccountId) {
-        this.contract_id = contract_id;
-    }
-  
-    emit() {
-        SetMtContract.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-class UpdateNft {
-    nft_token_id: AccountId;
-    nft_token_owner_id: AccountId;
-    mt_lock_token_ids: string[];
-    mt_lock_amounts: (string | number)[];
-    mt_unlock_token_ids: string[];
-    mt_unlock_amounts: (string | number)[];
-    nft_token_metadata: NFTTokenMetadata;
-    constructor(nft_token_id: AccountId, nft_token_owner_id: AccountId, mt_lock_token_ids: string[], mt_lock_amounts: (string | number)[], mt_unlock_token_ids: string[], mt_unlock_amounts: (string | number)[], nft_token_metadata: NFTTokenMetadata) {
-        this.nft_token_id = nft_token_id;
-        this.nft_token_owner_id = nft_token_owner_id;
-        this.mt_lock_token_ids = mt_lock_token_ids;
-        this.mt_lock_amounts = mt_lock_amounts;
-        this.mt_unlock_token_ids = mt_unlock_token_ids;
-        this.mt_unlock_amounts = mt_unlock_amounts;
-        this.nft_token_metadata = nft_token_metadata;
-    }
-  
-    emit() {
-        UpdateNft.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_composition_v1(data).emit();
-    }
-}
-
-function new_composition_v1(event_kind) {
-    return new CompositionEvent('1.0.0', event_kind);
-}
 //#endregion
 
 @NearBindgen({ requireInit: true })
@@ -160,7 +78,7 @@ class Composition {
 
         this.oracles.set(account_id, true);
 
-        new AddOracle(account_id).emit();
+        new CustomEventV1("AddOracle", { account_id }).emit();
     }
 
     @call({})
@@ -173,7 +91,7 @@ class Composition {
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.oracles.set(account_id, false);
-        new RevekeOracle(account_id).emit();
+        new CustomEventV1("RevekeOracle", { account_id }).emit();
     }
 
     @view({})
@@ -195,7 +113,7 @@ class Composition {
 
         this.nft_contract_id = contract_id;
 
-        new SetNftContract(contract_id).emit();
+        new CustomEventV1("SetNftContract", {contract_id}).emit();
     }
 
     @view({})
@@ -212,7 +130,7 @@ class Composition {
         assert(validateAccountId(contract_id), "Contract ID is invalid");
 
         this.mt_contract_id = contract_id;
-        new SetMtContract(contract_id).emit();
+        new CustomEventV1("SetMtContract", {contract_id}).emit();
     }
 
     @view({})
@@ -353,7 +271,7 @@ class Composition {
         mt_unlock_amounts: (string | number)[],
         nft_token_metadata: NFTTokenMetadata
     }): boolean {
-        new UpdateNft(nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata).emit();
+        new CustomEventV1("UpdateNft", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
         try {
             near.promiseResult(0);
         } catch {

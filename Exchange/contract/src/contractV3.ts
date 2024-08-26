@@ -91,173 +91,20 @@ export class ExchangeEvent extends NearEvent {
     }
 }
 
-class AddOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-      AddOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class RevekeOracle {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeOracle.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
+class CustomEventV1 extends NearEvent {
+        standard: string
+        version: string
+        event: string
+        data: any
+    constructor(event: string, data: any) {
+        super()
+        this.standard = "VRTX-Exchange"
+        this.version = "1.0.0"
+        this.event = event
+        this.data = data
     }
 }
 
-class SetFeeOwner {
-    ft_contract_id: AccountId;
-    account_id: AccountId;
-    constructor(ft_contract_id: AccountId, account_id: AccountId) {
-        this.ft_contract_id = ft_contract_id;
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        SetFeeOwner.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetDistributor {
-    ft_contract_id: AccountId;
-    account_id: AccountId;
-    constructor(ft_contract_id: AccountId, account_id: AccountId) {
-        this.ft_contract_id = ft_contract_id;
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        SetDistributor.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetDistributorRate {
-    ft_contract_id: AccountId;
-    rate: string | number;
-    initial_amount: string | number;
-    interval_time: string | number;
-    constructor(ft_contract_id: AccountId, rate: string | number, initial_amount: string | number, interval_time: string | number) {
-        this.ft_contract_id = ft_contract_id;
-        this.rate = rate;
-        this.initial_amount = initial_amount;
-        this.interval_time = interval_time;
-    }
-  
-    emit() {
-        SetDistributorRate.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetExchangeRatio {
-    ft_contract_id: AccountId;
-    ratio: string | number;
-    constructor(ft_contract_id: AccountId, ratio: string | number) {
-        this.ft_contract_id = ft_contract_id;
-        this.ratio = ratio;
-    }
-  
-    emit() {
-        SetExchangeRatio.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetExchangeFeeRatio {
-    ft_contract_id: AccountId;
-    ratio: string | number;
-    constructor(ft_contract_id: AccountId, ratio: string | number) {
-        this.ft_contract_id = ft_contract_id;
-        this.ratio = ratio;
-    }
-  
-    emit() {
-        SetExchangeFeeRatio.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetMinimumExchangeableAmount {
-    ft_contract_id: AccountId;
-    amount: string | number;
-    constructor(ft_contract_id: AccountId, amount: string | number) {
-        this.ft_contract_id = ft_contract_id;
-        this.amount = amount;
-    }
-  
-    emit() {
-        SetMinimumExchangeableAmount.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class SetExchangeGuardRate {
-    ft_contract_id: AccountId;
-    rate: string | number;
-    constructor(ft_contract_id: AccountId, rate: string | number) {
-        this.ft_contract_id = ft_contract_id;
-        this.rate = rate;
-    }
-  
-    emit() {
-        SetExchangeGuardRate.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-class ExchangeToken {
-    ft_contract_id: AccountId;
-    amount: string;
-    fee: string;
-    recipient: AccountId;
-    constructor(ft_contract_id: AccountId, amount: string, fee: string, recipient: AccountId) {
-        this.ft_contract_id = ft_contract_id;
-        this.amount = amount;
-        this.fee = fee;
-        this.recipient = recipient;
-    }
-  
-    emit() {
-        ExchangeToken.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_exchange_v1(data).emit();
-    }
-}
-
-function new_exchange_v1(event_kind) {
-    return new ExchangeEvent("1.0.0", event_kind);
-}
 //#endregion
 
 @NearBindgen({ requireInit: true })
@@ -335,7 +182,7 @@ export class Exchange {
 
         this.oracles.set(account_id, true);
 
-        new AddOracle(account_id).emit();
+        new CustomEventV1("AddOracle", { account_id }).emit();
     }
 
     @call({})
@@ -348,7 +195,7 @@ export class Exchange {
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.oracles.set(account_id, false);
-        new RevekeOracle(account_id).emit();
+        new CustomEventV1("RevekeOracle", { account_id }).emit();
     }
 
     @view({})
@@ -371,7 +218,7 @@ export class Exchange {
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.fee_owners.set(ft_contract_id, account_id);
-        new SetFeeOwner(ft_contract_id, account_id).emit();
+        new CustomEventV1("SetFeeOwner", {ft_contract_id, account_id}).emit();
     }
 
     @view({})
@@ -392,7 +239,7 @@ export class Exchange {
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.distributors.set(ft_contract_id, account_id);
-        new SetDistributor(ft_contract_id, account_id).emit();
+        new CustomEventV1("SetDistributor", {ft_contract_id, account_id}).emit();
     }
 
     @view({})
@@ -418,7 +265,7 @@ export class Exchange {
         this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
         this.distribute_rates.set(ft_contract_id, BigInt(rate));
 
-        new SetDistributorRate(ft_contract_id, rate, initial_amount, interval_time).emit();
+        new CustomEventV1("SetDistributorRate", {ft_contract_id, rate, initial_amount, interval_time}).emit();
     }
 
     @view({})
@@ -442,7 +289,7 @@ export class Exchange {
         
         this.exchange_ratios.set(ft_contract_id, BigInt(ratio));
 
-        new SetExchangeRatio(ft_contract_id, ratio).emit();
+        new CustomEventV1("SetExchangeRatio", {ft_contract_id, ratio}).emit();
     }
 
     @view({})
@@ -465,7 +312,7 @@ export class Exchange {
         assert(BigInt(ratio) >= 0 && BigInt(ratio) < 1000, `Ratio '${ratio}' is not a valid number`);
 
         this.exchange_fee_ratios.set(ft_contract_id, BigInt(ratio));
-        new SetExchangeFeeRatio(ft_contract_id, ratio).emit();
+        new CustomEventV1("SetExchangeFeeRatio", {ft_contract_id, ratio}).emit();
     }
 
     @view({})
@@ -487,7 +334,7 @@ export class Exchange {
         assert(BigInt(amount) >= 0, `amount must be positive`);
 
         this.minimum_exchangeable_amounts.set(ft_contract_id, BigInt(amount));
-        new SetMinimumExchangeableAmount(ft_contract_id, amount).emit();
+        new CustomEventV1("SetMinimumExchangeableAmount", {ft_contract_id, amount}).emit();
     }
 
     @view({})
@@ -509,7 +356,7 @@ export class Exchange {
         assert(BigInt(rate) >= 0 && BigInt(rate) < 1000, `rate '${rate}' is not a valid number`);
 
         this.exchage_guard_rates.set(ft_contract_id, BigInt(rate));
-        new SetExchangeGuardRate(ft_contract_id, rate).emit();
+        new CustomEventV1("SetExchangeGuardRate", {ft_contract_id, rate}).emit();
     }
 
     @view({})
@@ -658,7 +505,7 @@ export class Exchange {
         fee: string,
         recipient: AccountId
     }): boolean {
-        new ExchangeToken(ft_contract_id, amount, fee, recipient).emit();
+        new CustomEventV1("ExchangeToken", {ft_contract_id, amount, fee, recipient}).emit();
         try {
             near.promiseResult(0);
         } catch {

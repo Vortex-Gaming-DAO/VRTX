@@ -62,55 +62,6 @@ class CustomEventV1 extends NearEvent {
     }
 }
 
-class RevekeMinter {
-    account_id: AccountId;
-    constructor(account_id: AccountId) {
-        this.account_id = account_id;
-    }
-  
-    emit() {
-        RevekeMinter.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_171_v1(data).emit();
-    }
-}
-
-class UpdateMetadataEvent {
-    metadata: NFTContractMetadata;
-    constructor(metadata: NFTContractMetadata) {
-        this.metadata = metadata;
-    }
-  
-    emit() {
-        UpdateMetadataEvent.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_171_v1(data).emit();
-    }
-}
-
-class UpdateTokenMetadataEvent {
-    token_id: TokenId;
-    token_metadata: TokenMetadata;
-    locked?: boolean;
-    constructor(token_id: TokenId, token_metadata: TokenMetadata, locked?: boolean) {
-        this.token_id = token_id;
-        this.token_metadata = token_metadata;
-        this.locked = locked;
-    }
-  
-    emit() {
-        UpdateTokenMetadataEvent.emit_many([this]);
-    }
-    static emit_many(data) {
-        new_171_v1(data).emit();
-    }
-}
-  
-function new_171_v1(event_kind) {
-    return new Nep171Event("1.0.0", event_kind);
-}
 //#endregion
 
 @NearBindgen({ requireInit: true })
@@ -263,7 +214,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         assert(validateAccountId(account_id), "Account ID is invalid");
 
         this.minters.set(account_id, false);
-        new RevekeMinter(account_id).emit();
+        new CustomEventV1("RevekeMinter", { account_id }).emit();
     }
 
     @view({})
@@ -284,7 +235,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
 
         this.metadata = Object.assign(new NFTContractMetadata(), metadata);
         this.metadata.assert_valid();
-        new UpdateMetadataEvent(this.metadata).emit();
+        new CustomEventV1("UpdateMetadataEvent", {this.metadata}).emit();
     }
 
     @call({})
@@ -299,6 +250,6 @@ export class AvatarSBT implements NonFungibleTokenCore,
 
         this.tokens.token_metadata_by_id?.set(token_id, token_metadata);
         this.token_locks.set(token_id, locked || false);
-        new UpdateTokenMetadataEvent(token_id, token_metadata, locked).emit();
+        new CustomEventV1("UpdateTokenMetadataEvent", {token_id, token_metadata, locked}).emit();
     }
 }

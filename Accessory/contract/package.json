@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "near-cli": "^3.4.2",
-    "near-contract-standards": "^1.0.0",
+    "near-contract-standards": "^2.0.0",
     "near-sdk-js": "^2.0.0"
   },
   "devDependencies": {

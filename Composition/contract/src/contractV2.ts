@@ -196,7 +196,7 @@ class Composition {
                         nft_token_metadata: nft_token_metadata
                     }), 
                     NO_DEPOSIT, 
-                    SIXTY_TGAS
+                    HUNDRED_TGAS
                 ))
             .then(NearPromise.new(near.currentAccountId())
                 .functionCall(
@@ -211,7 +211,7 @@ class Composition {
                         nft_token_metadata,
                     }), 
                     NO_DEPOSIT, 
-                    TEN_TGAS
+                    THIRTY_TGAS
                 )
             );
 
@@ -244,7 +244,7 @@ class Composition {
                     "update_nft_callback", 
                     NO_ARGS, 
                     NO_DEPOSIT, 
-                    TEN_TGAS
+                    FIFTY_TGAS
                 ));
 
         return promise.asReturn();

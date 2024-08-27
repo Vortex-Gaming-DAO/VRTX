@@ -235,7 +235,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
 
         this.metadata = Object.assign(new NFTContractMetadata(), metadata);
         this.metadata.assert_valid();
-        new CustomEventV1("UpdateMetadataEvent", {this.metadata}).emit();
+        new CustomEventV1("UpdateMetadataEvent", {metadata : this.metadata}).emit();
     }
 
     @call({})

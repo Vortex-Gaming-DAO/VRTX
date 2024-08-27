@@ -290,7 +290,7 @@ class Accessory {
         this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
         this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
 
-        new CustomEventV1("MtTransfer", {sender_id, receiver_id, [token_id], [amount], [approval], memo}).emit();
+        new CustomEventV1("MtTransfer", {sender_id, receiver_id, token_ids : [token_id], amounts : [amount], approvals : [approval], memo}).emit();
     }
 
     @call({})

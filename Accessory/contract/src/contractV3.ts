@@ -9,7 +9,8 @@ class MTContractMetadata {
     name: string; // 필수. 메타데이터의 이름. 예를 들어 "Zoink's Digital Sword Collection".
 
     assert_valid() {
-        
+        assert(this.name.length > 0 && this.name.length <= 20, 'name length must be 0 to 20');
+        assert(this.spec.length > 0 && this.spec.length <= 20, 'spec length must be 0 to 20');
     }
 }
 

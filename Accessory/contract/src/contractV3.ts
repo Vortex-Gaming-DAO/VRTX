@@ -451,7 +451,7 @@ class Accessory {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
-        if(!this.token_indices.get(token_id)) {
+        if(!this.tokens.get(token_id)) {
             this.token_indices.set(this.token_count.toString(), token_id);
             this.token_count += 1;
         }

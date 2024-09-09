@@ -427,7 +427,7 @@ class Accessory {
     }): void {
         const sender_id = near.predecessorAccountId();
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
-        if(!this.tokens.get(token_id)) {
+        if(!this.token_base_metadatas.get(token_id)) {
             this.token_indices.set(this.token_count.toString(), token_id);
             this.token_count += 1;
         }

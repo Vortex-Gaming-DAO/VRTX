@@ -57,10 +57,10 @@ class Token {
     base_metadata_id: string;
 
     constructor(
-        token_id,
-        owner_id,
-        token_metadata,
-        base_metadata_id,
+        token_id: string,
+        owner_id: string | null,
+        token_metadata: MTTokenMetadata | null,
+        base_metadata_id: string,
     ) {
         this.token_id = token_id;
         this.owner_id = owner_id;

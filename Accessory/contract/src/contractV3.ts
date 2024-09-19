@@ -190,6 +190,7 @@ class Accessory {
         for (let index = 0; index < token_ids.length; ++index) {
             const token_id = token_ids[index];
             const amount = amounts[index];
+            assert(this.tokens.get(token_id), "Token ID is not defined.");
             assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
             assert(BigInt(amount) > 0, `amount must be positive`);

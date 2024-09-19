@@ -469,6 +469,10 @@ export class Exchange {
         // 수수료 VRTX양
         const exchange_fee = exchange_amount * this._get_exchange_fee_ratio(ft_contract_id) / BigInt(1000);
 
+        // 현재 상태 저장 (롤백에 사용하기 위해)
+        const current_distribute_amount = exchangeable_amount;
+        const current_distribute_time = this.distribute_times.get(ft_contract_id, { defaultValue: BigInt(0) });
+
         const promise = NearPromise.new(ft_contract_id)
                             .functionCall(
                                 "ft_transfer", 
@@ -483,9 +487,10 @@ export class Exchange {
                                 FIVE_TGAS
                             ))
                             .then(NearPromise.new(near.currentAccountId()).functionCall(
-                                "ft_transfer_callback", 
-                                JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient }), 
-                                NO_DEPOSIT, 
+                                "ft_transfer_callback",
+                                JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient, 
+                                                 original_distribute_amount: current_distribute_amount.toString(), original_distribute_time: current_distribute_time.toString() }),
+                                NO_DEPOSIT,
                                 FIVE_TGAS
                             ));
 
@@ -503,20 +508,23 @@ export class Exchange {
     }
 
     @call({privateFunction: true})
-    ft_transfer_callback({ ft_contract_id, amount, fee, recipient }: {
+    ft_transfer_callback({ ft_contract_id, amount, fee, recipient, original_distribute_amount, original_distribute_time }: {
         ft_contract_id: AccountId,
         amount: string,
         fee: string,
-        recipient: AccountId
+        recipient: AccountId,
+        original_distribute_amount: string,
+        original_distribute_time: string
     }): boolean {
-        new CustomEventV1("ExchangeToken", {ft_contract_id, amount, fee, recipient}).emit();
         try {
             near.promiseResult(0);
+            new CustomEventV1("ExchangeToken", {ft_contract_id, amount, fee, recipient}).emit();
+            return true;
         } catch {
+            this.distribute_amounts.set(ft_contract_id, BigInt(original_distribute_amount));
+            this.distribute_times.set(ft_contract_id, BigInt(original_distribute_time));
             return false;          
         }
-
-        return true;
     }
 
     @view({})

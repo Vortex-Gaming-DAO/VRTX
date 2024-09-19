@@ -480,12 +480,12 @@ export class Exchange {
                                 DEPOSIT_1YOCTO, 
                                 FIVE_TGAS
                             )
-                            .then(NearPromise.new(ft_contract_id).functionCall(
+                            .functionCall(
                                 "ft_transfer", 
                                 JSON.stringify({ receiver_id: fee_owner, amount: exchange_fee.toString() }), 
                                 DEPOSIT_1YOCTO, 
                                 FIVE_TGAS
-                            ))
+                            )
                             .then(NearPromise.new(near.currentAccountId()).functionCall(
                                 "ft_transfer_callback",
                                 JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient, 

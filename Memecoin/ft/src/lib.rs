@@ -111,6 +111,7 @@ impl Contract {
         use_update_metadata: bool
     ) -> Self {
         assert!(!env::state_exists(), "Already initialized");
+        assert!(env::is_valid_account_id(owner_id.as_bytes()), "Initial Owner ID is invalid");
         metadata.assert_valid();
         let mut this = Self {
             token: FungibleToken::new(b"a".to_vec()),

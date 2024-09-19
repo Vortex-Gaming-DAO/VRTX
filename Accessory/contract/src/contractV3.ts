@@ -154,7 +154,7 @@ class Accessory {
         owner_id: string;
         metadata: MTContractMetadata;
     }): void {
-        assert(validateAccountId(owner_id), "Initial Owner ID is invalid");
+        assert(owner_id === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
         this.owner_id = owner_id;
         this.metadata = Object.assign(this.metadata, metadata);
         this.metadata.assert_valid();

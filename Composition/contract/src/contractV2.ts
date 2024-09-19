@@ -60,7 +60,7 @@ class Composition {
     init({ owner_id }: {
         owner_id: AccountId;
     }): void {
-        assert(validateAccountId(owner_id), "Initial Owner ID is invalid");
+        assert(owner_id === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
         this.owner_id = owner_id;
         this.oracles = new LookupMap(new StorageKeyOracle().into_storage_key());
         this.oracles.set(owner_id, true);

@@ -192,12 +192,48 @@ class Composition {
                 .functionCall(
                     "mt_lock_and_unlock_callback", 
                     JSON.stringify({
-                        nft_token_id: nft_token_id,
-                        nft_token_metadata: nft_token_metadata
+                        nft_token_owner_id,
+                        nft_token_id,
+                        mt_lock_token_ids,
+                        mt_lock_amounts,
+                        mt_unlock_token_ids,
+                        mt_unlock_amounts,
+                        nft_token_metadata,
                     }), 
-                    NO_DEPOSIT, 
+                    NO_DEPOSIT,
                     HUNDRED_TGAS
-                ))
+                )
+            );
+
+        return promise.asReturn();
+    }
+
+    @call({ privateFunction: true })
+    mt_lock_and_unlock_callback({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
+        nft_token_id: AccountId,
+        nft_token_owner_id: AccountId,
+        mt_lock_token_ids: string[],
+        mt_lock_amounts: (string | number)[],
+        mt_unlock_token_ids: string[],
+        mt_unlock_amounts: (string | number)[],
+        nft_token_metadata: NFTTokenMetadata
+    }): NearPromise | boolean {
+        try {
+            near.promiseResult(0);
+        } catch {
+            return false;
+        }
+
+        const promise = NearPromise.new(this.nft_contract_id)
+            .functionCall(
+                "update_token_metadata", 
+                JSON.stringify({ 
+                    token_id: nft_token_id, 
+                    token_metadata: nft_token_metadata 
+                }), 
+                NO_DEPOSIT, 
+                TWENTY_TGAS
+            )
             .then(NearPromise.new(near.currentAccountId())
                 .functionCall(
                     "update_nft_event",
@@ -219,49 +255,6 @@ class Composition {
     }
 
     @call({ privateFunction: true })
-    mt_lock_and_unlock_callback({ nft_token_id, nft_token_metadata }: {
-        nft_token_id: string,
-        nft_token_metadata: NFTTokenMetadata
-    }): NearPromise | boolean {
-        try {
-            near.promiseResult(0);
-        } catch {
-            return false;
-        }
-
-        const promise = NearPromise.new(this.nft_contract_id)
-            .functionCall(
-                "update_token_metadata", 
-                JSON.stringify({ 
-                    token_id: nft_token_id, 
-                    token_metadata: nft_token_metadata 
-                }), 
-                NO_DEPOSIT, 
-                TWENTY_TGAS
-            )
-            .then(NearPromise.new(near.currentAccountId())
-                .functionCall(
-                    "update_nft_callback", 
-                    NO_ARGS, 
-                    NO_DEPOSIT, 
-                    FIFTY_TGAS
-                ));
-
-        return promise.asReturn();
-    }
-
-    @call({ privateFunction: true })
-    update_nft_callback(): boolean {
-        try {
-            near.promiseResult(0);
-        } catch {
-            return false;
-        }
-
-        return true;
-    }
-
-    @call({ privateFunction: true })
     update_nft_event({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
         nft_token_id: AccountId,
         nft_token_owner_id: AccountId,
@@ -271,12 +264,12 @@ class Composition {
         mt_unlock_amounts: (string | number)[],
         nft_token_metadata: NFTTokenMetadata
     }): boolean {
-        new CustomEventV1("UpdateNft", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
         try {
             near.promiseResult(0);
         } catch {
             return false;
         }
+        new CustomEventV1("UpdateNft", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
 
         return true;
     }

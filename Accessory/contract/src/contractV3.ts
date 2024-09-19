@@ -276,23 +276,24 @@ class Accessory {
         approval: [ owner_id: AccountId, approval_id: number ] | null,
         memo: string | null
     }): void {
-        const sender_id = near.predecessorAccountId();
-        assert(this.minters.get(sender_id), "Sender is not a minter");
-        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
-        assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
-        assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-        assert(BigInt(amount) > 0, `amount must be positive`);
+        throw new Error("not supported");
+        // const sender_id = near.predecessorAccountId();
+        // assert(this.minters.get(sender_id), "Sender is not a minter");
+        // assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
+        // assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+        // assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+        // assert(BigInt(amount) > 0, `amount must be positive`);
 
-        const token_receiver_key = `${receiver_id}:${token_id}`;
-        const token_sender_key   = `${sender_id}:${token_id}`;
+        // const token_receiver_key = `${receiver_id}:${token_id}`;
+        // const token_sender_key   = `${sender_id}:${token_id}`;
     
-        const amount_to_transfer = BigInt(amount);
-        assert(this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) >= amount_to_transfer, "Insufficient balance");
+        // const amount_to_transfer = BigInt(amount);
+        // assert(this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) >= amount_to_transfer, "Insufficient balance");
 
-        this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
-        this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
+        // this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key, { defaultValue: BigInt(0) }) - amount_to_transfer);
+        // this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key, { defaultValue: BigInt(0) }) + amount_to_transfer);
 
-        new CustomEventV1("MtTransfer", {sender_id, receiver_id, token_ids : [token_id], amounts : [amount], approvals : [approval], memo}).emit();
+        // new CustomEventV1("MtTransfer", {sender_id, receiver_id, token_ids : [token_id], amounts : [amount], approvals : [approval], memo}).emit();
     }
 
     @call({})
@@ -303,31 +304,32 @@ class Accessory {
         approvals: ([ owner_id: AccountId, approval_id: number ] | null)[],
         memo: string | null
     }): void {
-        const sender_id = near.predecessorAccountId();
-        assert(this.minters.get(sender_id), "Sender is not a minter");
-        assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
-        assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
-        assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
+        throw new Error("not supported");
+        // const sender_id = near.predecessorAccountId();
+        // assert(this.minters.get(sender_id), "Sender is not a minter");
+        // assert(validateAccountId(receiver_id), "Receiver account ID is invalid");
+        // assert(Array.isArray(token_ids) && Array.isArray(amounts), "token_ids and amounts must be an array.");
+        // assert(token_ids.length === amounts.length, "The length of token_ids and amounts must be the same.")
 
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_id = token_ids[index];
-            const amount = amounts[index];
-            assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
-            assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) > 0, `amount must be positive`);
-        }
+        // for (let index = 0; index < token_ids.length; ++index) {
+        //     const token_id = token_ids[index];
+        //     const amount = amounts[index];
+        //     assert(this.valid_bigint({ value: token_id }), `Token ID '${token_id}' is not a valid number`);
+        //     assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
+        //     assert(BigInt(amount) > 0, `amount must be positive`);
+        // }
 
-        for (let index = 0; index < token_ids.length; ++index) {
-            const token_receiver_key = `${receiver_id}:${token_ids[index]}`;
-            const token_sender_key   = `${sender_id}:${token_ids[index]}`;
+        // for (let index = 0; index < token_ids.length; ++index) {
+        //     const token_receiver_key = `${receiver_id}:${token_ids[index]}`;
+        //     const token_sender_key   = `${sender_id}:${token_ids[index]}`;
 
-            const amount_to_transfer = BigInt(amounts[index]);
-            assert(this.token_balances.get(token_sender_key) >= amount_to_transfer, "Insufficient balance");
+        //     const amount_to_transfer = BigInt(amounts[index]);
+        //     assert(this.token_balances.get(token_sender_key) >= amount_to_transfer, "Insufficient balance");
     
-            this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key) - amount_to_transfer);
-            this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key) + amount_to_transfer);
-        }
-        new CustomEventV1("MtTransfer", {sender_id, receiver_id, token_ids, amounts, approvals, memo}).emit();
+        //     this.token_balances.set(token_sender_key, this.token_balances.get(token_sender_key) - amount_to_transfer);
+        //     this.token_balances.set(token_receiver_key, this.token_balances.get(token_receiver_key) + amount_to_transfer);
+        // }
+        // new CustomEventV1("MtTransfer", {sender_id, receiver_id, token_ids, amounts, approvals, memo}).emit();
     }
 
     @call({})

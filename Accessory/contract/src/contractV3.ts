@@ -168,12 +168,12 @@ class Accessory {
         this.token_indices = new LookupMap(new StorageKeyTokenIndex().into_storage_key());
     }
 
-    @migrate({})
-    migrateState() {
-        const sender_id = near.predecessorAccountId();
-        let state = JSON.parse(near.storageRead("STATE"));
-        assert(sender_id === state.owner_id, "Sender is not the contract's owner");
-    }
+    // @migrate({})
+    // migrateState() {
+    //     const sender_id = near.predecessorAccountId();
+    //     let state = JSON.parse(near.storageRead("STATE"));
+    //     assert(sender_id === state.owner_id, "Sender is not the contract's owner");
+    // }
 
     @call({ payableFunction: true })
     mt_mint({ token_ids, amounts, token_owner_id }: {

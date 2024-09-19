@@ -162,12 +162,12 @@ export class Exchange {
         this.signatures = new LookupMap(new StorageKeySignatures().into_storage_key());
     }
 
-    @migrate({})
-    migrateState() {
-        const sender_id = near.predecessorAccountId();
-        let state = JSON.parse(near.storageRead("STATE"));
-        assert(sender_id === state.owner_id, "Sender is not the contract's owner");
-    }
+    // @migrate({})
+    // migrateState() {
+    //     const sender_id = near.predecessorAccountId();
+    //     let state = JSON.parse(near.storageRead("STATE"));
+    //     assert(sender_id === state.owner_id, "Sender is not the contract's owner");
+    // }
 
     /* oracle management */
 

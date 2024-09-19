@@ -439,6 +439,9 @@ export class Exchange {
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
         assert(BigInt(amount) > 0, `amount must be positive`);
 
+        const TOTAL_REQUIRED_GAS = FIVE_TGAS + FIVE_TGAS + FIVE_TGAS;
+        assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
+
         const signature_hash = this.toHexString({byteArray: near.sha256(bytes(recipient + ":" +  signature_id))});
         assert(!this.signatures.get(signature_hash, { defaultValue: false }), "Signature is reused");
         this.signatures.set(signature_hash, true);

@@ -175,6 +175,9 @@ class Composition {
             assert(BigInt(amount) > 0, `MT Unlock amount must be positive`);
         }
 
+        const TOTAL_REQUIRED_GAS = TWENTY_TGAS + HUNDRED_TGAS + TWENTY_TGAS + THIRTY_TGAS;
+        assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
+
         const promise = NearPromise.new(this.mt_contract_id)
             .functionCall(
                 "mt_lock_and_unlock", 

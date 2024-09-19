@@ -164,14 +164,14 @@ class Composition {
             const amount = mt_lock_amounts[index];
             assert(this.valid_bigint({ value: token_id }), `MT Lock Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `MT Lock Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) >= 0, `MT Lock amount must be positive`);
+            assert(BigInt(amount) > 0, `MT Lock amount must be positive`);
         }
         for (let index = 0; index < mt_unlock_token_ids.length; ++index) {
             const token_id = mt_unlock_token_ids[index];
             const amount = mt_unlock_amounts[index];
             assert(this.valid_bigint({ value: token_id }), `MT Unlock Token ID '${token_id}' is not a valid number`);
             assert(this.valid_bigint({ value: amount }), `MT Unlock Amount '${amount}' is not a valid number`);
-            assert(BigInt(amount) >= 0, `MT Unlock amount must be positive`);
+            assert(BigInt(amount) > 0, `MT Unlock amount must be positive`);
         }
 
         const promise = NearPromise.new(this.mt_contract_id)

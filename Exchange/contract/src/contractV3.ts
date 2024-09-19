@@ -331,7 +331,7 @@ export class Exchange {
         assert(sender_id === this.owner_id, "Sender is not the contract's owner");
         assert(validateAccountId(ft_contract_id), "FT Contract ID is invalid");
         assert(this.valid_bigint({ value: amount }), `Amount '${amount}' is not a valid number`);
-        assert(BigInt(amount) >= 0, `amount must be positive`);
+        assert(BigInt(amount) > 0, `amount must be positive`);
 
         this.minimum_exchangeable_amounts.set(ft_contract_id, BigInt(amount));
         new CustomEventV1("SetMinimumExchangeableAmount", {ft_contract_id, amount}).emit();

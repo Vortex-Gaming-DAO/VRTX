@@ -175,56 +175,46 @@ class Composition {
             assert(BigInt(amount) > 0, `MT Unlock amount must be positive`);
         }
 
-        const TOTAL_REQUIRED_GAS = TWENTY_TGAS + HUNDRED_TGAS + TWENTY_TGAS + THIRTY_TGAS;
+        const TOTAL_REQUIRED_GAS = TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS;
         assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
 
-        const promise = NearPromise.new(this.mt_contract_id)
-            .functionCall(
-                "mt_lock_and_unlock", 
-                JSON.stringify({ 
-                    nft_token_id: nft_token_id, 
-                    token_owner_id: nft_token_owner_id, 
-                    lock_token_ids: mt_lock_token_ids,
-                    lock_amounts: mt_lock_amounts,
-                    unlock_token_ids: mt_unlock_token_ids, 
-                    unlock_amounts: mt_unlock_amounts 
-                }), 
-                NO_DEPOSIT,
-                TWENTY_TGAS
-            )
-            .then(NearPromise.new(this.nft_contract_id))
+        const promise = 
+            NearPromise.new(this.mt_contract_id)
                 .functionCall(
-                    "update_token_metadata", 
+                    "mt_lock_and_unlock", 
                     JSON.stringify({ 
-                        token_id: nft_token_id, 
-                        token_metadata: nft_token_metadata 
-                    }), 
-                    NO_DEPOSIT, 
+                        nft_token_id: nft_token_id, 
+                        token_owner_id: nft_token_owner_id, 
+                        lock_token_ids: mt_lock_token_ids,
+                        lock_amounts: mt_lock_amounts,
+                        unlock_token_ids: mt_unlock_token_ids, 
+                        unlock_amounts: mt_unlock_amounts 
+                    }),
+                    NO_DEPOSIT,
                     TWENTY_TGAS
                 )
             .then(NearPromise.new(near.currentAccountId())
                 .functionCall(
-                    "update_nft_event",
+                    "mt_lock_and_unlock_callback",
                     JSON.stringify({
-                        nft_token_owner_id,
                         nft_token_id,
+                        nft_token_owner_id,
                         mt_lock_token_ids,
                         mt_lock_amounts,
                         mt_unlock_token_ids,
                         mt_unlock_amounts,
-                        nft_token_metadata,
-                    }), 
-                    NO_DEPOSIT, 
-                    THIRTY_TGAS
+                        nft_token_metadata
+                    }),
+                    NO_DEPOSIT,
+                    TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS
                 )
             );
-            
 
         return promise.asReturn();
     }
 
-    @call({ privateFunction: true })
-    update_nft_event({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
+    @call({ privateFunction: true})
+    mt_lock_and_unlock_callback({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
         nft_token_id: AccountId,
         nft_token_owner_id: AccountId,
         mt_lock_token_ids: string[],
@@ -232,15 +222,110 @@ class Composition {
         mt_unlock_token_ids: string[],
         mt_unlock_amounts: (string | number)[],
         nft_token_metadata: NFTTokenMetadata
-    }): boolean {
+    }) {
         try {
             near.promiseResult(0);
+
+            const promise = 
+                NearPromise.new(this.nft_contract_id)
+                    .functionCall(
+                        "update_token_metadata", 
+                        JSON.stringify({ 
+                            token_id: nft_token_id, 
+                            token_metadata: nft_token_metadata 
+                        }), 
+                        NO_DEPOSIT, 
+                        TWENTY_TGAS
+                    )
+                .then(NearPromise.new(near.currentAccountId())
+                    .functionCall(
+                        "update_token_metadata_callback", 
+                        JSON.stringify({
+                            nft_token_id,
+                            nft_token_owner_id,
+                            mt_lock_token_ids,
+                            mt_lock_amounts,
+                            mt_unlock_token_ids,
+                            mt_unlock_amounts,
+                            nft_token_metadata
+                        }),
+                        NO_DEPOSIT,
+                        TWENTY_TGAS + TWENTY_TGAS + TWENTY_TGAS
+                    )
+                );
+            return promise.asReturn();
         } catch {
             return false;
         }
-        new CustomEventV1("UpdateNft", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
+    }
 
+    @call({ privateFunction: true})
+    update_token_metadata_callback({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
+        nft_token_id: AccountId,
+        nft_token_owner_id: AccountId,
+        mt_lock_token_ids: string[],
+        mt_lock_amounts: (string | number)[],
+        mt_unlock_token_ids: string[],
+        mt_unlock_amounts: (string | number)[],
+        nft_token_metadata: NFTTokenMetadata
+    }) {
+        try {
+            near.promiseResult(0);
+            new CustomEventV1("UpdateNft", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
+        } catch {
+            const promise = 
+            NearPromise.new(this.mt_contract_id)
+                .functionCall(
+                    "mt_lock_and_unlock", 
+                    JSON.stringify({ 
+                        nft_token_id: nft_token_id, 
+                        token_owner_id: nft_token_owner_id, 
+                        lock_token_ids: mt_unlock_token_ids,
+                        lock_amounts: mt_unlock_amounts,
+                        unlock_token_ids: mt_lock_token_ids, 
+                        unlock_amounts: mt_lock_amounts
+                    }),
+                    NO_DEPOSIT,
+                    TWENTY_TGAS
+                )
+            .then(NearPromise.new(near.currentAccountId())
+                .functionCall(
+                    "mt_lock_and_unlock_rollback_callback",
+                    JSON.stringify({
+                        nft_token_id,
+                        nft_token_owner_id,
+                        mt_lock_token_ids,
+                        mt_lock_amounts,
+                        mt_unlock_token_ids,
+                        mt_unlock_amounts,
+                        nft_token_metadata
+                    }),
+                    NO_DEPOSIT,
+                    TWENTY_TGAS
+                )
+            );
+            return promise.asReturn();
+        }
         return true;
+    }
+
+    @call({ privateFunction: true})
+    mt_lock_and_unlock_rollback_callback({ nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata }: {
+        nft_token_id: AccountId,
+        nft_token_owner_id: AccountId,
+        mt_lock_token_ids: string[],
+        mt_lock_amounts: (string | number)[],
+        mt_unlock_token_ids: string[],
+        mt_unlock_amounts: (string | number)[],
+        nft_token_metadata: NFTTokenMetadata
+    }) {
+        try {
+            near.promiseResult(0);
+            return true;
+        } catch {
+            new CustomEventV1("UpdateNftRollbackFail", {nft_token_id, nft_token_owner_id, mt_lock_token_ids, mt_lock_amounts, mt_unlock_token_ids, mt_unlock_amounts, nft_token_metadata}).emit();
+            return false;
+        }
     }
 
     valid_bigint({ value }: { value: string | number }): boolean {

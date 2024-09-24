@@ -88,7 +88,7 @@ export class AvatarSBT implements NonFungibleTokenCore,
         metadata: NFTContractMetadata;
         is_sbt?: boolean;
     }): void {
-        assert(owner_id === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
+        assert(near.predecessorAccountId() === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
         this.metadata = Object.assign(new NFTContractMetadata(), metadata);
         this.metadata.assert_valid();
         this.tokens = new NonFungibleToken();

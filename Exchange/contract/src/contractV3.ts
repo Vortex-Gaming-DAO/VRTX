@@ -146,7 +146,7 @@ export class Exchange {
         owner_id: AccountId;
         restrict_to_oracle: boolean;
     }): void {
-        assert(owner_id === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
+        assert(near.predecessorAccountId() === 'vrtxnft.vrtx', "Initial Owner ID is invalid");
         this.owner_id = owner_id;
         this.oracles = new LookupMap(new StorageKeyOracle().into_storage_key());
         this.oracles.set(owner_id, true);
@@ -472,7 +472,7 @@ export class Exchange {
 
         const TOTAL_REQUIRED_GAS = FIVE_TGAS + FIVE_TGAS + FIVE_TGAS;
         assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
-        
+
         const promise = NearPromise.new(ft_contract_id)
                             .functionCall(
                                 "ft_transfer", 

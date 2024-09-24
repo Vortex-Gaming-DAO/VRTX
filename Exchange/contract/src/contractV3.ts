@@ -466,10 +466,6 @@ export class Exchange {
         // 수수료 VRTX양
         const exchange_fee = exchange_amount * this._get_exchange_fee_ratio(ft_contract_id) / BigInt(1000);
 
-        // 현재 상태 저장 (롤백에 사용하기 위해)
-        const current_distribute_amount = exchangeable_amount;
-        const current_distribute_time = this.distribute_times.get(ft_contract_id, { defaultValue: BigInt(0) });
-
         const TOTAL_REQUIRED_GAS = FIVE_TGAS + FIVE_TGAS + FIVE_TGAS;
         assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
 
@@ -489,15 +485,10 @@ export class Exchange {
                             .then(NearPromise.new(near.currentAccountId()).functionCall(
                                 "ft_transfer_callback",
                                 JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient, 
-                                                 original_distribute_amount: current_distribute_amount.toString(), original_distribute_time: current_distribute_time.toString() }),
+                                    exchange_amount: exchange_amount.toString() }),
                                 NO_DEPOSIT,
                                 FIVE_TGAS
                             ));
-
-        // 교환 가능한 양 재설정
-        this.distribute_amounts.set(ft_contract_id, exchangeable_amount - BigInt(exchange_amount));
-        // 타이머 재설정
-        this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
         
         // storage 사용량 확인
         let storage_used = near.storageUsage() - initial_storage_usage;
@@ -508,21 +499,26 @@ export class Exchange {
     }
 
     @call({privateFunction: true})
-    ft_transfer_callback({ ft_contract_id, amount, fee, recipient, original_distribute_amount, original_distribute_time }: {
+    ft_transfer_callback({ ft_contract_id, amount, fee, recipient, exchange_amount }: {
         ft_contract_id: AccountId,
         amount: string,
         fee: string,
         recipient: AccountId,
-        original_distribute_amount: string,
-        original_distribute_time: string
+        exchange_amount: string
     }): boolean {
         try {
             near.promiseResult(0);
+
+            // 교환 가능한 양
+            const exchangeable_amount = this._get_distribute_amount(ft_contract_id);
+            // 교환 가능한 양 재설정
+            this.distribute_amounts.set(ft_contract_id, BigInt(exchangeable_amount) - BigInt(exchange_amount));
+            // 타이머 재설정
+            this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
+
             new CustomEventV1("ExchangeToken", {ft_contract_id, amount, fee, recipient}).emit();
             return true;
         } catch {
-            this.distribute_amounts.set(ft_contract_id, BigInt(original_distribute_amount));
-            this.distribute_times.set(ft_contract_id, BigInt(original_distribute_time));
             return false;          
         }
     }

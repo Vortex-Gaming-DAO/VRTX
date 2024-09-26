@@ -1,7 +1,8 @@
 import { NearBindgen, NearPromise, AccountId, LookupMap, IntoStorageKey, near, initialize, call, view, assert, migrate, validateAccountId, bytes } from "near-sdk-js";
 import { NearEvent } from "near-contract-standards/lib/event";
 
-const FIVE_TGAS = BigInt("50000000000000");
+const FIFTY_TGAS = BigInt("50000000000000");
+const SEVENTY_TGAS   = BigInt( "70000000000000");
 const NO_DEPOSIT = BigInt(0);
 const DEPOSIT_1YOCTO = BigInt(1);
 const NO_ARGS = JSON.stringify({});
@@ -466,7 +467,7 @@ export class Exchange {
         // 수수료 VRTX양
         const exchange_fee = exchange_amount * this._get_exchange_fee_ratio(ft_contract_id) / BigInt(1000);
 
-        const TOTAL_REQUIRED_GAS = FIVE_TGAS + FIVE_TGAS + FIVE_TGAS;
+        const TOTAL_REQUIRED_GAS = FIFTY_TGAS + FIFTY_TGAS + FIFTY_TGAS + SEVENTY_TGAS;
         assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
 
         const promise = NearPromise.new(ft_contract_id)
@@ -474,20 +475,20 @@ export class Exchange {
                                 "ft_transfer", 
                                 JSON.stringify({ receiver_id: recipient, amount: (exchange_amount - exchange_fee).toString() }), 
                                 DEPOSIT_1YOCTO, 
-                                FIVE_TGAS
+                                FIFTY_TGAS
                             )
                             .functionCall(
                                 "ft_transfer", 
                                 JSON.stringify({ receiver_id: fee_owner, amount: exchange_fee.toString() }), 
                                 DEPOSIT_1YOCTO, 
-                                FIVE_TGAS
+                                FIFTY_TGAS
                             )
                             .then(NearPromise.new(near.currentAccountId()).functionCall(
                                 "ft_transfer_callback",
                                 JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient, 
                                     exchange_amount: exchange_amount.toString() }),
                                 NO_DEPOSIT,
-                                FIVE_TGAS
+                                FIFTY_TGAS
                             ));
         
         // storage 사용량 확인

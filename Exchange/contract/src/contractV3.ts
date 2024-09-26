@@ -470,6 +470,11 @@ export class Exchange {
         const TOTAL_REQUIRED_GAS = FIFTY_TGAS + FIFTY_TGAS + FIFTY_TGAS + SEVENTY_TGAS;
         assert(near.prepaidGas() >= TOTAL_REQUIRED_GAS, `Not enough prepaid gas for cross-contract calls.`);
 
+        // 교환 가능한 양 재설정
+        this.distribute_amounts.set(ft_contract_id, exchangeable_amount - BigInt(exchange_amount));
+        // 타이머 재설정
+        this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
+
         const promise = NearPromise.new(ft_contract_id)
                             .functionCall(
                                 "ft_transfer", 
@@ -485,11 +490,12 @@ export class Exchange {
                             )
                             .then(NearPromise.new(near.currentAccountId()).functionCall(
                                 "ft_transfer_callback",
-                                JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient, 
-                                    exchange_amount: exchange_amount.toString() }),
+                                JSON.stringify({ ft_contract_id, amount: (exchange_amount - exchange_fee).toString(), fee: exchange_fee.toString(), recipient }),
                                 NO_DEPOSIT,
                                 FIFTY_TGAS
                             ));
+
+
         
         // storage 사용량 확인
         let storage_used = near.storageUsage() - initial_storage_usage;
@@ -500,26 +506,23 @@ export class Exchange {
     }
 
     @call({privateFunction: true})
-    ft_transfer_callback({ ft_contract_id, amount, fee, recipient, exchange_amount }: {
+    ft_transfer_callback({ ft_contract_id, amount, fee, recipient }: {
         ft_contract_id: AccountId,
         amount: string,
         fee: string,
         recipient: AccountId,
-        exchange_amount: string
     }): boolean {
         try {
             near.promiseResult(0);
-
-            // 교환 가능한 양
-            const exchangeable_amount = this._get_distribute_amount(ft_contract_id);
-            // 교환 가능한 양 재설정
-            this.distribute_amounts.set(ft_contract_id, BigInt(exchangeable_amount) - BigInt(exchange_amount));
-            // 타이머 재설정
-            this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
-
             new CustomEventV1("ExchangeToken", {ft_contract_id, amount, fee, recipient}).emit();
             return true;
         } catch {
+            const exchange_amount = BigInt(amount) + BigInt(fee);
+            const exchangeable_amount = this._get_distribute_amount(ft_contract_id);
+            // 실패시 차감했던 금액만큼 다시 증가(Increase again by the amount deducted in case of failure)
+            this.distribute_amounts.set(ft_contract_id, exchangeable_amount + BigInt(exchange_amount));
+            // 타이머 재설정
+            this.distribute_times.set(ft_contract_id, this._get_interval_count(ft_contract_id));
             return false;          
         }
     }

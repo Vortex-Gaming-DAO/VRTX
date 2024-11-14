@@ -608,7 +608,7 @@ class Accessory {
     }): MTTokenMetadataAll[] {
         const all_token_metadatas: MTTokenMetadataAll[] = token_ids.map(token_id => {
             const base = this.token_base_metadatas.get(token_id);
-            const token = this.tokens.get(token_id).token_metadata;
+            const token = this.tokens.get(token_id)?.token_metadata;
             return {
                 base,
                 token
@@ -623,7 +623,7 @@ class Accessory {
         token_ids: string[]
     }): MTTokenMetadata[] {
         const token_metadatas: MTTokenMetadata[] = token_ids.map(token_id => {
-            const token = this.tokens.get(token_id).token_metadata;
+            const token = this.tokens.get(token_id)?.token_metadata;
             return token
         })
         
@@ -683,5 +683,10 @@ class Accessory {
         } catch {
             return false;
         }
+    }
+
+    @view({})
+    get_owner(): string {
+        return this.owner_id;
     }
 }

@@ -10,4 +10,4 @@ fi
 echo ">> Deploying contract"
 
 # https://docs.near.org/tools/near-cli#near-dev-deploy
-near dev-deploy --wasmFile build/avatar_sbt.wasm
+near dev-deploy --wasmFile buildV2/avatar_sbt.wasm

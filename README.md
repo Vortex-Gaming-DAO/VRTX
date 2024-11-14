@@ -64,3 +64,4 @@ Vortex Gaming isn't just a platform; it's a holistic ecosystem designed to be th
 
 ## Link
 ### [Vortex Gaming](https://vortexgaming.io/en)
+### [White Paper](https://vortexgaming.io/en/doc/whitepaper)
